@@ -1,3 +1,4 @@
+// Trigger Vercel rebuild
 /**
  * Formats a number as Indian Rupee (INR) currency.
  * @param {number|string} amount - The amount to format.
