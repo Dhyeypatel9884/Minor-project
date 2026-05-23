@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Briefcase, IndianRupee, ShieldAlert, CheckCircle2, XCircle, AlertTriangle, Menu, Loader2, MessageSquare, X } from 'lucide-react';
+import { Users, Briefcase, IndianRupee, ShieldAlert, CheckCircle2, XCircle, AlertTriangle, Menu, Loader2, MessageSquare, X, Gavel } from 'lucide-react';
 import api from '../../utils/api';
 import { useToast } from '../../components/Toast';
 import AdminSidebar from '../../components/dashboard/AdminSidebar';
@@ -77,6 +77,28 @@ const AdminDashboard = () => {
       fetchAdminData();
     } catch (err) {
       toast.error(err.message || 'Failed to remove user');
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm('Are you sure you want to permanently delete this project? This will also remove any bids on this project. This action cannot be undone.')) return;
+    
+    try {
+      await api.delete(`/admin/projects/${projectId}`);
+      toast.success('Project permanently deleted');
+      fetchAdminData();
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete project');
+    }
+  };
+
+  const handleToggleBlock = async (userId) => {
+    try {
+      const res = await api.put(`/admin/users/${userId}/block`);
+      toast.success(res.message || 'User block status updated');
+      fetchAdminData();
+    } catch (err) {
+      toast.error(err.message || 'Failed to update user block status');
     }
   };
 
@@ -240,6 +262,12 @@ const AdminDashboard = () => {
                                 Cancel
                               </button>
                             )}
+                            <button 
+                              onClick={() => handleDeleteProject(project._id)}
+                              className="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              Delete
+                            </button>
                           </td>
                         </tr>
                         {expandedProject === project._id && (
@@ -309,7 +337,9 @@ const AdminDashboard = () => {
                             </span>
                           </td>
                           <td className="p-4">
-                            {user.isVerified ? (
+                            {user.isBlocked ? (
+                              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md border border-red-200">Blocked</span>
+                            ) : user.isVerified ? (
                               <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-200">Verified</span>
                             ) : user.verificationStatus === 'Pending' ? (
                               <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-md border border-yellow-200 animate-pulse">Pending Review</span>
@@ -332,6 +362,16 @@ const AdminDashboard = () => {
                                 Approve
                               </button>
                             )}
+                            <button 
+                              onClick={() => handleToggleBlock(user._id)}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                                user.isBlocked 
+                                  ? 'text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100' 
+                                  : 'text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100'
+                              }`}
+                            >
+                              {user.isBlocked ? 'Unblock' : 'Block'}
+                            </button>
                             <button 
                               onClick={() => handleRemoveUser(user._id)}
                               className="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors"

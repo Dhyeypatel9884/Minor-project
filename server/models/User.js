@@ -59,6 +59,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['None', 'Pending', 'Verified'],
         default: 'None'
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

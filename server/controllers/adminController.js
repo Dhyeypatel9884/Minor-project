@@ -52,7 +52,7 @@ exports.getPlatformUsers = async (req, res) => {
     try {
         // Include bio, institution, skills, and verificationStatus for authenticity checks, but exclude email/password
         const users = await User.find({ role: { $ne: 'admin' } })
-            .select('fullName role avatar createdAt isVerified verificationStatus bio institution skills')
+            .select('fullName role avatar createdAt isVerified verificationStatus bio institution skills isBlocked')
             .sort({ createdAt: -1 });
             
         res.json({ success: true, users });
@@ -129,5 +129,55 @@ exports.removeUser = async (req, res) => {
         res.json({ success: true, message: 'User removed successfully' });
     } catch (err) {
         res.status(500).json({ message: 'Server error removing user' });
+    }
+};
+
+// @desc    Admin deletes a project permanently
+// @route   DELETE /api/admin/projects/:id
+// @access  Private/Admin
+exports.deleteProject = async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        // Permanently delete associated bids
+        await Bid.deleteMany({ project: req.params.id });
+
+        // Permanently delete the project
+        await Project.findByIdAndDelete(req.params.id);
+
+        res.json({ success: true, message: 'Project and associated bids have been permanently deleted' });
+    } catch (err) {
+        console.error('Delete project error:', err);
+        res.status(500).json({ message: 'Server error deleting project' });
+    }
+};
+
+// @desc    Admin blocks/unblocks a user
+// @route   PUT /api/admin/users/:id/block
+// @access  Private/Admin
+exports.toggleBlockUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.role === 'admin') {
+            return res.status(400).json({ message: 'Cannot block an administrator' });
+        }
+
+        user.isBlocked = !user.isBlocked;
+        await user.save();
+
+        res.json({ 
+            success: true, 
+            message: `User has been successfully ${user.isBlocked ? 'blocked' : 'unblocked'}` 
+        });
+    } catch (err) {
+        console.error('Toggle block error:', err);
+        res.status(500).json({ message: 'Server error updating block status' });
     }
 };

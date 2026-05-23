@@ -96,6 +96,10 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
+        if (user.isBlocked) {
+            return res.status(403).json({ message: 'Your account has been blocked by the administrator. Please contact support.' });
+        }
+
         if (user.role !== role) {
             return res.status(400).json({ message: `This account is registered as a ${user.role}, not a ${role}` });
         }
