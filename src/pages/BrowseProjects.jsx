@@ -26,8 +26,7 @@ const BrowseProjects = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/projects')
-      .then(res => res.json())
+    api.get('/projects')
       .then(data => {
         if (Array.isArray(data)) {
           setProjects(data);

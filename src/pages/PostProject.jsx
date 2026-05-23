@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '../utils/formatters';
 import { useToast } from '../components/Toast';
+import api from '../utils/api';
 
 const PostProject = () => {
   const navigate = useNavigate();
@@ -108,17 +109,7 @@ const PostProject = () => {
         formDataToSubmit.append('image', selectedFile);
       }
 
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formDataToSubmit
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to post project');
-      }
+      await api.post('/projects', formDataToSubmit);
 
       toast.success('Project posted successfully!');
       setTimeout(() => navigate('/client/my-projects'), 700);
