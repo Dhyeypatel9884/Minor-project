@@ -21,5 +21,12 @@ export const formatCurrency = (amount) => {
 export const getImageUrl = (path) => {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  return `http://localhost:5000${path}`;
+  
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
+  const baseUrl = apiBase 
+    ? apiBase.replace(/\/api\/?$/, '') 
+    : (import.meta.env.PROD ? window.location.origin : 'http://localhost:5000');
+    
+  return `${baseUrl}${path.startsWith('/') ? path : '/' + path}`;
 };
+

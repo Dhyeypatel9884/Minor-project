@@ -15,7 +15,8 @@ const connectDB = async () => {
         console.log('⏳ Connecting to MongoDB...');
         
         const conn = await mongoose.connect(connString, {
-            // Options can be added here if needed
+            family: 4,
+            serverSelectionTimeoutMS: 5000,
         });
 
         console.log(`✅ MongoDB Connected Successfully: ${conn.connection.host}`);
